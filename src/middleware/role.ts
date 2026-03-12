@@ -7,7 +7,7 @@ export function requireRole(role: string) {
     const user = await getUserByTelegramId(telegramId);
 
     if (!user || user.role !== role) {
-      return ctx.reply("У вас нет доступа");
+      return ctx.reply("У вас нет доступа к этой команде.");
     }
 
     return next();
