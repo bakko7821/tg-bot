@@ -1,9 +1,10 @@
 import { bot } from "./bot";
 
-import "./commands/start";
+import "./commands/help";
 import "./commands/own";
-import "./handlers/message";
+import "./commands/start";
 import { initDatabase } from "./database/init";
+import "./handlers/message";
 
 async function start() {
   await initDatabase();

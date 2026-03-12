@@ -1,4 +1,4 @@
-import { TelegramUser, User } from "../../utils/types";
+import { TelegramUser, User, UserRole } from "../../utils/types";
 import { db } from "../db";
 
 export async function getUserByTelegramId(telegramId: number) {
@@ -46,6 +46,24 @@ export async function getUser(telegramId: number): Promise<User | null> {
     WHERE telegram_id = $1
     `,
     [telegramId],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+export async function updateUserRole(
+  telegram_id: number,
+  role: string,
+): Promise<User | null> {
+  const result = await db.query(
+    `
+    UPDATE users
+    SET role = $1,
+        updated_at = NOW()
+    WHERE telegram_id = $2
+    RETURNING *
+    `,
+    [role, telegram_id],
   );
 
   return result.rows[0] ?? null;

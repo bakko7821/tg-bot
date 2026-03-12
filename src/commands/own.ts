@@ -1,6 +1,6 @@
 import { Context, Markup } from "telegraf";
 import { bot } from "../bot";
-import { getUser } from "../database/queries/user";
+import { getUser, updateUserRole } from "../database/queries/user";
 import { requireRole } from "../middleware/role";
 import { waitingForUserId } from "../state";
 
@@ -101,10 +101,12 @@ bot.action("own_change_role", async (ctx) => {
   await ctx.editMessageText(
     `Пользователь: ${user.username ?? user.telegram_id}\nТекущая роль: ${user.role}\n\nВыберите новую роль`,
     Markup.inlineKeyboard([
-      [Markup.button.callback("Пользователь", "set_role:user")],
-      [Markup.button.callback("VIP", "set_role:vip")],
-      [Markup.button.callback("Админ", "set_role:admin")],
-      [Markup.button.callback("Назад", "back")],
+      [
+        Markup.button.callback("User", "set_role:user"),
+        Markup.button.callback("VIP", "set_role:vip"),
+        Markup.button.callback("Admin", "set_role:admin"),
+      ],
+      [Markup.button.callback("← Назад", "back")],
     ]),
   );
 });
@@ -120,7 +122,12 @@ bot.action(/set_role:(.+)/, async (ctx) => {
     return;
   }
 
-  // await updateUserRole(user.telegram_id, role);
+  const updatedUser = await updateUserRole(user.telegram_id, role);
+
+  if (!updatedUser) {
+    await ctx.editMessageText("Не удалось изменить роль.");
+    return;
+  }
 
   targetUsers.delete(ctx.from.id);
 

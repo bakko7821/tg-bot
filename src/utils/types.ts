@@ -1,4 +1,18 @@
-export type UserRole = "owner" | "admin" | "vip" | "user";
+export const USER_ROLES = {
+  USER: "user",
+  VIP: "vip",
+  ADMIN: "admin",
+  OWNER: "owner",
+} as const;
+
+export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
+
+export const roleLevel: Record<UserRole, number> = {
+  [USER_ROLES.USER]: 1,
+  [USER_ROLES.VIP]: 2,
+  [USER_ROLES.ADMIN]: 3,
+  [USER_ROLES.OWNER]: 4,
+};
 
 export interface User {
   telegram_id: number;
