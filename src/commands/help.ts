@@ -12,7 +12,11 @@ const helpSections: HelpSection[] = [
   {
     role: "user",
     title: "Основные команды",
-    commands: [],
+    commands: [
+      "/ - записаться",
+      "/ - отменить запись",
+      "/ - ознакомиться с услугами",
+    ],
   },
   {
     role: "vip",
@@ -22,7 +26,12 @@ const helpSections: HelpSection[] = [
   {
     role: "admin",
     title: "Admin 👨‍💻",
-    commands: [],
+    commands: [
+      "/shop_info - информация о магазине",
+      "/event_list - список записей.",
+      "/add_event - добавить запись",
+      "/done_event - завершить запись",
+    ],
   },
   {
     role: "owner",
