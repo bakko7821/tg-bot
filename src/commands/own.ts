@@ -1,50 +1,33 @@
-import { Markup } from "telegraf";
+import { Context, Markup } from "telegraf";
 import { bot } from "../bot";
 import { getUser } from "../database/queries/user";
 import { requireRole } from "../middleware/role";
 import { waitingForUserId } from "../state";
 
-let lastTargetId: number | null = null;
+const targetUsers = new Map<number, number>();
 
 // === === === === ===
 // Функции
 // === === === === ===
 
-async function getTargetUser(ctx: any) {
-  if (!lastTargetId) {
-    await ctx.editMessageText("Ошибка. ID не найден.");
-    return null;
-  }
+async function getTargetUser(ctx: Context) {
+  if (!ctx.from) return null;
 
-  const user = await getUser(lastTargetId);
+  const adminId = ctx.from.id;
+  const targetId = targetUsers.get(adminId);
 
-  if (!user) {
-    await ctx.editMessageText("Пользователь не найден.");
-    return null;
-  }
+  if (!targetId) return null;
 
-  return user;
+  return await getUser(targetId);
 }
 
-async function setRole(ctx: any, role: string) {
-  await ctx.answerCbQuery();
+export async function handleOwnReply(ctx: Context) {
+  if (!ctx.from || !ctx.message || !("text" in ctx.message)) return;
 
-  const user = await getTargetUser(ctx);
-  if (!user) return;
-
-  // тут позже будет updateRole()
-  // await updateUserRole(user.telegram_id, role);
-
-  await ctx.editMessageText(
-    `Роль пользователя: @${user.username}, изменена на ${role}`,
-  );
-}
-
-export async function handleOwnReply(ctx: any) {
   const text = ctx.message.text;
-  const userId = ctx.from.id;
+  const adminId = ctx.from.id;
 
-  if (!waitingForUserId.has(userId)) return false;
+  if (!waitingForUserId.has(adminId)) return false;
 
   const targetId = Number(text);
 
@@ -53,8 +36,8 @@ export async function handleOwnReply(ctx: any) {
     return true;
   }
 
-  waitingForUserId.delete(userId);
-  lastTargetId = targetId;
+  waitingForUserId.delete(adminId);
+  targetUsers.set(adminId, targetId);
 
   await ctx.reply(
     `ID ${targetId} получен.`,
@@ -65,6 +48,22 @@ export async function handleOwnReply(ctx: any) {
   );
 
   return true;
+}
+
+async function renderOwnMenu(ctx: Context) {
+  const user = await getTargetUser(ctx);
+  if (!user) {
+    await ctx.editMessageText("Пользователь не найден.");
+    return;
+  }
+
+  await ctx.editMessageText(
+    `Пользователь: ${user.username ?? user.telegram_id}\nЧто сделать?`,
+    Markup.inlineKeyboard([
+      [Markup.button.callback("Информация", "own_info")],
+      [Markup.button.callback("Изменить роль", "own_change_role")],
+    ]),
+  );
 }
 
 // === === === === ===
@@ -79,23 +78,18 @@ bot.command("own", requireRole("owner"), async (ctx) => {
 bot.action("own_info", async (ctx) => {
   await ctx.answerCbQuery();
 
-  if (!lastTargetId) {
-    await ctx.editMessageText("Ошибка. ID не найден.");
-    return;
-  }
-
-  const user = await getUser(lastTargetId);
-
-  if (!user) {
-    await ctx.editMessageText("Пользователь не найден.");
-    return;
-  }
+  const user = await getTargetUser(ctx);
+  if (!user) return;
 
   await ctx.editMessageText(
-    `Имя: ${user.first_name}
-    Фамилия: ${user.last_name}
-    Username: ${user.username}`,
+    `Пользователь: ${user.username ?? user.telegram_id}\nРоль: ${user.role}`,
+    Markup.inlineKeyboard([[Markup.button.callback("Назад", "back")]]),
   );
+});
+
+bot.action("back", async (ctx) => {
+  await ctx.answerCbQuery();
+  await renderOwnMenu(ctx);
 });
 
 bot.action("own_change_role", async (ctx) => {
@@ -105,11 +99,12 @@ bot.action("own_change_role", async (ctx) => {
   if (!user) return;
 
   await ctx.editMessageText(
-    `Пользователь: @${user.username}, сейчас обладает правами: ${user.role}. Выберите роль.`,
+    `Пользователь: ${user.username ?? user.telegram_id}\nТекущая роль: ${user.role}\n\nВыберите новую роль`,
     Markup.inlineKeyboard([
       [Markup.button.callback("Пользователь", "set_role:user")],
       [Markup.button.callback("VIP", "set_role:vip")],
       [Markup.button.callback("Админ", "set_role:admin")],
+      [Markup.button.callback("Назад", "back")],
     ]),
   );
 });
@@ -118,11 +113,18 @@ bot.action(/set_role:(.+)/, async (ctx) => {
   await ctx.answerCbQuery();
 
   const role = ctx.match[1];
-
   const user = await getTargetUser(ctx);
-  if (!user) return;
+
+  if (!user) {
+    await ctx.editMessageText("Пользователь не найден.");
+    return;
+  }
+
+  // await updateUserRole(user.telegram_id, role);
+
+  targetUsers.delete(ctx.from.id);
 
   await ctx.editMessageText(
-    `Роль пользователя: @${user.username}, изменена на ${role}`,
+    `Роль пользователя ${user.username ?? user.telegram_id} изменена на ${role}`,
   );
 });
