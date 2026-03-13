@@ -1,6 +1,5 @@
 import { bot } from "../bot";
-import { handleOwnReply } from "../commands/own";
-import { waitingForUserId } from "../state";
+import { handleOwnReply } from "../commands/owner/own";
 
 bot.on("text", async (ctx) => {
   const text = ctx.message.text;

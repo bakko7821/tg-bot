@@ -1,8 +1,8 @@
 import { Context, Markup } from "telegraf";
-import { bot } from "../bot";
-import { getUser, updateUserRole } from "../database/queries/user";
-import { requireRole } from "../middleware/role";
-import { waitingForUserId } from "../state";
+import { getUser, updateUserRole } from "../../database/queries/user";
+import { waitingForUserId } from "../../state";
+import { requireRole } from "../../middleware/role";
+import { bot } from "../../bot";
 
 const targetUsers = new Map<number, number>();
 

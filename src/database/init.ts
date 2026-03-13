@@ -44,6 +44,19 @@ export async function initDatabase() {
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS shops (
+      id BIGSERIAL PRIMARY KEY,
+
+      owner_id BIGINT NOT NULL,
+
+      name TEXT NOT NULL,
+
+      token_encrypted TEXT NOT NULL,
+
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
   `);
 
   console.log("Database initialized");

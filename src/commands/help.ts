@@ -36,7 +36,10 @@ const helpSections: HelpSection[] = [
   {
     role: "owner",
     title: "Owner👤",
-    commands: ["/own - команда добавления ролей"],
+    commands: [
+      "/own - команда добавления ролей",
+      "/new_shop - создать новый магазин",
+    ],
   },
 ];
 

@@ -1,16 +1,23 @@
 import { bot } from "./bot";
 
 import "./commands/help";
-import "./commands/own";
+import "./commands/owner/own";
+import "./commands/owner/new_shop";
 import "./commands/start";
-import { initDatabase } from "./database/init";
+
 import "./handlers/message";
+
+import { initDatabase } from "./database/init";
+import { startAllShopBots } from "./bot/botManager";
 
 async function start() {
   await initDatabase();
 
   await bot.launch();
-  console.log("Bot started 🤖");
+  console.log("Main bot started 🤖");
+
+  await startAllShopBots();
+  console.log("All shop bots started 🏪");
 }
 
 start();
