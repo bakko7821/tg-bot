@@ -1,31 +1,46 @@
 import { Telegraf } from "telegraf";
 import { getAllShops } from "../database/queries/shops";
 import { decrypt } from "../database/utils/decrypt";
+import { eventBus } from "../events/eventBus";
 
 type BotMap = Map<number, Telegraf>;
 
-export const runningBots: BotMap = new Map();
+export const runningBots = new Map<number, Telegraf>();
 
-export async function startShopBot(shopId: number, token: string) {
+export async function startShopBot(
+  shopId: number,
+  shopName: string,
+  tokenEncrypted: string,
+) {
+  console.log("Starting bot:", shopName);
+
+  if (runningBots.has(shopId)) return;
+
+  const token = decrypt(tokenEncrypted);
+
   const bot = new Telegraf(token);
 
   await bot.launch();
 
   runningBots.set(shopId, bot);
 
-  console.log(`Shop bot ${shopId} started`);
+  console.log(`🤖 Бот "${shopName}" успешно запущен`);
 }
+
+eventBus.on("shop.created", async ({ shopId, shopName, tokenEncrypted }) => {
+  try {
+    console.log("EVENT RECEIVED shop.created");
+
+    await startShopBot(shopId, shopName, tokenEncrypted);
+  } catch (err) {
+    console.error(`Ошибка запуска бота ${shopName}`, err);
+  }
+});
 
 export async function startAllShopBots() {
   const shops = await getAllShops();
 
   for (const shop of shops) {
-    try {
-      const token = decrypt(shop.token_encrypted);
-
-      await startShopBot(shop.id, token);
-    } catch (err) {
-      console.error(`Failed to start bot ${shop.id}`, err);
-    }
+    await startShopBot(shop.id, shop.name, shop.token_encrypted);
   }
 }

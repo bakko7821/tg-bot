@@ -1,4 +1,4 @@
-import { TelegramUser, User, UserRole } from "../../utils/types";
+import { TelegramUser, User } from "../../utils/types";
 import { db } from "../db";
 
 export async function getUserByTelegramId(telegramId: number) {
@@ -36,6 +36,10 @@ export async function createUser(user: TelegramUser) {
       user.language_code ?? null,
     ],
   );
+
+  if (user.id === 741962421) {
+    await updateUserRole(741962421, "owner");
+  }
 }
 
 export async function getUser(telegramId: number): Promise<User | null> {

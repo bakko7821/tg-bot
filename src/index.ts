@@ -1,14 +1,14 @@
 import { bot } from "./bot";
 
 import "./commands/help";
-import "./commands/owner/own";
 import "./commands/owner/new_shop";
+import "./commands/owner/own";
 import "./commands/start";
 
 import "./handlers/message";
 
-import { initDatabase } from "./database/init";
 import { startAllShopBots } from "./bot/botManager";
+import { initDatabase } from "./database/init";
 
 async function start() {
   await initDatabase();
@@ -16,8 +16,11 @@ async function start() {
   await bot.launch();
   console.log("Main bot started 🤖");
 
+  if (!process.env.TOKEN_SECRET) {
+    throw new Error("TOKEN_SECRET not set");
+  }
+
   await startAllShopBots();
-  console.log("All shop bots started 🏪");
 }
 
 start();
