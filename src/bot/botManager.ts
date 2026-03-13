@@ -2,6 +2,7 @@ import { Telegraf } from "telegraf";
 import { getAllShops } from "../database/queries/shops";
 import { decrypt } from "../database/utils/decrypt";
 import { eventBus } from "../events/eventBus";
+import { registerBotHandlers } from "./registerHandlers";
 
 type BotMap = Map<number, Telegraf>;
 
@@ -19,6 +20,8 @@ export async function startShopBot(
   const token = decrypt(tokenEncrypted);
 
   const bot = new Telegraf(token);
+
+  registerBotHandlers(bot);
 
   await bot.launch();
 
