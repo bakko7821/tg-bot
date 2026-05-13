@@ -1,5 +1,10 @@
 import { bot } from "../bot";
+import { userService } from "../services/user.service";
 
-bot.start((ctx) => {
-  ctx.reply("Привет! Я бот 🤖");
+bot.start(async (ctx) => {
+  if (!ctx.from) return;
+
+  await userService.register(ctx.from);
+
+  ctx.reply("Ты зарегистрирован 🤖");
 });
