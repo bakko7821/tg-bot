@@ -47,3 +47,5 @@ nodemon-debug.log
 # 📌 Optional: lock files (если хочешь чистый репо)
 # package-lock.json
 # yarn.lock
+
+*.db
