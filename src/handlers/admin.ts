@@ -3,7 +3,7 @@ import { onlyOwner } from "../middleware/onlyOwner";
 import { bot } from "../bot";
 
 bot.command(
-  "getDb",
+  "get_db",
   onlyOwner(async (ctx: any) => {
     const tempFile = "backup.db";
 

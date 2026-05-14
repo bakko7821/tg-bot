@@ -14,3 +14,11 @@ export async function isUser(tgId: number): Promise<boolean> {
 
   return !!user;
 }
+
+export async function isSubscriber(tgId: number): Promise<boolean> {
+  const user = await get(`SELECT isSubscriber FROM users WHERE tgId = ?`, [
+    tgId,
+  ]);
+
+  return !!user;
+}
